@@ -17,7 +17,57 @@ def token(value, label):
         raise ValueError(f'{label}: use 1–64 ASCII letters, digits, _ or -')
     return value
 
+def preflight(book):
+    """Validate the whole input before writing even the first chapter.
+
+    Review declarations are an auditable editorial record, not an automated
+    claim that the source interpretation or synthesized acting is correct.
+    """
+    if book.get('execution_mode', 'canvas-host') != 'canvas-host':
+        raise ValueError('Only key-free Gemini Canvas host execution is supported')
+    if book.get('editorial_status') != 'reviewed':
+        raise ValueError('Delivery blocked: editorial_status must be reviewed; an unfinished draft is not a deliverable')
+    chapters, filenames = set(), set()
+    for chapter in book['chapters']:
+        number = chapter['number']
+        if not isinstance(number, int) or number < 1 or number in chapters:
+            raise ValueError('Chapter numbers must be unique positive integers')
+        chapters.add(number)
+        if not chapter['segments']:
+            raise ValueError('Each chapter needs at least one segment')
+        for order, segment in enumerate(chapter['segments']):
+            where = f'Chapter {number}, segment {order}'
+            cid = token(segment.get('cast_id', 'narrator'), 'cast_id')
+            profile = book['cast'][cid]
+            if re.match(r'(?i)^(pending|unresolved|unknown|placeholder|tbd)(?:[_\s:-]|$)', cid) or re.match(r'(?i)^\s*(pending|unresolved|unknown|placeholder|tbd)\b', profile.get('name', '')):
+                raise ValueError(f'{where}: unresolved cast is blocked; read adjacent source context and assign the actual character')
+            if not profile.get('voice') or not profile.get('persona'):
+                raise ValueError(f'{where}: actor needs a fixed voice and persona')
+            role = segment.get('kind', 'narration')
+            if role not in ('narration', 'dialogue', 'monologue'):
+                raise ValueError(f'{where}: invalid speech classification')
+            if not isinstance(segment.get('text'), str) or not segment['text'].strip():
+                raise ValueError(f'{where}: empty spoken text')
+            review = segment.get('review', {})
+            if segment.get('requires_review') or segment.get('requiresReview') or any(review.get(k) != 'confirmed' for k in ('attribution', 'classification', 'performance')) or not isinstance(review.get('evidence'), str) or not review['evidence'].strip():
+                raise ValueError(f'{where}: attribution/classification/performance review and source-context evidence are required')
+            perf = segment.get('performance', {})
+            if not 0 <= float(perf.get('intensity', .42)) <= 1:
+                raise ValueError(f'{where}: intensity must be between 0 and 1')
+            if book.get('detailed_performance_required'):
+                design = perf.get('design', {})
+                for field in ('addressee_intention', 'outer_inner', 'pivot', 'prosody', 'nonverbal', 'continuation'):
+                    if not isinstance(design.get(field), str) or not design[field].strip():
+                        raise ValueError(f'{where}: missing sentence acting design: {field}')
+            scene = token(segment.get('scene_id', f'C{number:02}'), 'scene_id')
+            filename = f"{token(book['prefix'], 'prefix')}_C{number:02}_{token(book.get('revision', 'V01'), 'revision')}_{order:04}_{scene}_{cid.upper()}.wav".casefold()
+            if filename in filenames:
+                raise ValueError(f'{where}: duplicate filename')
+            filenames.add(filename)
+
+
 def generate(book, output):
+    preflight(book)
     if book.get('execution_mode', 'canvas-host') != 'canvas-host':
         raise ValueError('Only key-free Gemini Canvas host execution is supported')
     prefix = token(book['prefix'], 'prefix')
@@ -26,6 +76,7 @@ def generate(book, output):
     cast_hash = digest(json.dumps(cast, ensure_ascii=False, sort_keys=True))
     model = book.get('model', 'gemini-2.5-flash-preview-tts')
     template = (ROOT/'assets/canvas-template.html').read_text(encoding='utf-8')
+    template = template.replace('__MP3_ZIP_RUNTIME__', (ROOT/'assets/mp3-zip-runtime.js').read_text(encoding='utf-8'))
     rows, used, chapters_seen = [], set(), set()
     output = Path(output); output.mkdir(parents=True, exist_ok=True)
     for chapter in book['chapters']:
@@ -70,7 +121,8 @@ def generate(book, output):
             unit = dict(id=f'C{number:02}_{order:04}', speaker=profile.get('name', cid),
                         kind=role, cast_id=cid, text=text, scene_id=scene, filename=filename,
                         voice=profile['voice'], model=model, cast_revision=revision,
-                        cast_sha256=cast_hash, performance=performance)
+                        cast_sha256=cast_hash, performance=performance,
+                        review=segment['review'])
             units.append(unit)
             rows.append(dict(chapter=number, order=order, scene_id=scene, segment_id=unit['id'],
                              speaker=unit['speaker'], kind=role, cast_id=cid, filename=filename,
@@ -80,7 +132,8 @@ def generate(book, output):
             raise ValueError('Each chapter needs at least one segment')
         episode = dict(schema_version='canvas-tts-1', chapter=number, title=chapter['title'],
                        language=book.get('language', 'ko-KR'), revision=revision, model=model,
-                       execution_mode='canvas-host',
+                       execution_mode='canvas-host', editorial_status='reviewed',
+                       audio_generation_verified=False, audio_listening_verified=False,
                        cast_revision=revision, cast_sha256=cast_hash,
                        voices={p.get('name', c):p['voice'] for c,p in cast.items()},
                        scenes=[dict(scene_id=f'C{number:02}', title=chapter['title'], segments=units)])
@@ -108,7 +161,7 @@ def main():
         parts=re.split(r'(?<=\n)(?=\n)',raw)
         parts=[p for p in parts if p] if raw.strip() else []
         if not parts or any(not p.strip() for p in parts): parts=[raw] if raw.strip() else []
-        book=dict(prefix=args.prefix,title=args.title,cast={'narrator':dict(name='나레이터',voice='Charon',persona='친절하고 또렷한 이야기 서술자')},chapters=[dict(number=1,title='1장',segments=[dict(text=p,cast_id='narrator') for p in parts])])
+        book=dict(prefix=args.prefix,title=args.title,editorial_status='reviewed',reading_mode='narration-only',cast={'narrator':dict(name='나레이터',voice='Charon',persona='친절하고 또렷한 이야기 서술자')},chapters=[dict(number=1,title='1장',segments=[dict(text=p,cast_id='narrator',review=dict(attribution='confirmed',classification='confirmed',performance='confirmed',evidence='Explicit TXT narration-only mode: entire supplied text belongs to one narrator. No dramatic speaker separation is claimed.')) for p in parts])])
     else:
         book=json.loads(args.source.read_text(encoding='utf-8-sig'))
     index=generate(book,args.out)

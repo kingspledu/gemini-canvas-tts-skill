@@ -11,6 +11,7 @@ with tempfile.TemporaryDirectory() as temp:
     out=Path(temp)/'output'
     book=copy.deepcopy(example)
     book['title']='다른 작품 <테스트>'
+    book['editorial_status']='reviewed'
     book['prefix']='SECOND'
     book['chapters'][0]['segments'][0]['text']='원문 보존: </script> & 한글\n줄바꿈도 남는다.'
     book['chapters'].append(copy.deepcopy(book['chapters'][0]))

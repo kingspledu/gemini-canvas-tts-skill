@@ -362,6 +362,8 @@ const apiKey = "";
         }
         function makePrompt(index) {
             const turn=turns[index],p=turn.performance;
+            if (!turn.review || ['attribution','classification','performance'].some(k=>turn.review[k]!=='confirmed') || !turn.review.evidence?.trim() || /^(pending|unresolved|unknown|placeholder|tbd)(?:[_\s:-]|$)/i.test(turn.cast_id)) throw new Error('대본 검토 정보가 없거나 미확정 화자입니다. 원문 문맥과 배역을 수정한 검증 완료 HTML을 사용하세요.');
+            if (!turn.voice || originalEpisode.voices[turn.speaker]!==turn.voice || !p.character_persona) throw new Error('고정 배역 목소리 또는 페르소나가 일치하지 않습니다.');
             return `드라마 오디오북. 낭독 언어: ${originalEpisode.language}. 청자에게 친절하고 선명하게. 화자: ${turn.speaker}. 목소리 정체성 고정. 전화 효과 없음.
 모델: ${turn.model}; 배역표 지문: ${turn.cast_sha256}; 고정 음색: ${turn.voice}; 배역 ID: ${turn.cast_id}; 발화 종류: ${turn.kind}.
 배역 페르소나: ${p.character_persona}
@@ -406,12 +408,14 @@ ${turn.text}`;
                 downloadStates.push(state);
                 const retry = document.createElement('button');
                 retry.className = 'retry-btn bg-amber-50 text-amber-800 px-3 py-2 rounded-lg text-sm';
-                retry.textContent = '다운로드 안 됨';
-                retry.title = '실제로 저장되지 않은 파일을 다음 일괄 저장 대상으로 지정합니다.';
+                retry.textContent = '다시 생성';
+                retry.title = '이 구간의 보관 음성을 지우고 다음 생성 대상으로 지정합니다. 기존에 저장한 파일은 삭제하지 않습니다.';
                 retry.addEventListener('click', () => {
                     if (batchRunning || activeRequests) return;
                     state.requested = false; state.verified = false; state.reason = '사용자가 미저장으로 지정';
-                    status.textContent = '재다운로드 대상 · 위 일괄 저장 버튼으로 다시 저장';
+                    if (audioUrl) URL.revokeObjectURL(audioUrl);
+                    audioUrl = null; cachedVoice = null; download.classList.add('hidden');
+                    status.textContent = '재생성 대상 · 생성/재생 또는 전체 생성으로 다시 생성';
                 });
                 download.addEventListener('click', event => {
                     if (directoryHandle && !readOnlyFolder) {
@@ -439,12 +443,8 @@ ${turn.text}`;
                         }
                         status.textContent = state.requested ? `다운로드 요청 완료 · ${voice}` : `생성 완료 · ${voice}`;
                         if (autoDownload) {
-                            if (directoryHandle && !readOnlyFolder) {
-                                status.textContent = '폴더 저장 / 검증 중…';
-                                await saveVerified(index, audioUrl, voice);
-                                state.verified = state.requested = true; state.failed = false; state.reason = null;
-                                status.textContent = '폴더 저장 및 내용 검증 완료';
-                            } else { download.click(); status.textContent = '다운로드 요청 · 저장되지 않으면 WAV 저장을 직접 누르세요'; }
+                            state.requested = true;
+                            status.textContent = '브라우저 보관 완료 · MP3 ZIP으로 한 번 저장하세요';
                         }
                         else {
                             if (previewAudio) previewAudio.pause();
@@ -462,16 +462,15 @@ ${turn.text}`;
         }
         batchProcessBtn.addEventListener('click', async () => {
             if (batchRunning || activeRequests || folderChecking || !turns.length) return;
-            if (directoryHandle) { try { await verifyDirectory(); } catch(error) { showMessage(error.message); return; } }
             const targets = turns.map((turn,index) => index).filter(index => {
                 if (retrySelection) return retrySelection.has(index);
                 const state = downloadStates[index];
                 const voice = turns[index].voice || hostVoiceSelect.value;
-                return (directoryHandle ? !state.verified : !state.requested) || state.failed || state.voice !== voice;
+                return !fileEntries[index]?.getUrl() || state.failed || state.voice !== voice;
             });
             batchStatus.classList.remove('hidden');
             if (!targets.length) {
-                batchStatus.textContent = '모든 항목의 다운로드를 요청했습니다. 저장되지 않은 파일은 다운로드 안 됨으로 지정하세요.';
+                batchStatus.textContent = '모든 음성이 브라우저에 보관돼 있습니다. MP3 ZIP으로 저장하세요.';
                 return;
             }
             batchRunning = true; lockControls();
@@ -489,7 +488,7 @@ ${turn.text}`;
                     progressBar.style.width = `${completed/targets.length*100}%`;
                     await new Promise(resolve => setTimeout(resolve,800));
                 }
-                batchStatus.textContent = `${directoryHandle ? '폴더 저장·검증' : '다운로드 요청'} ${completed-failed}개 · 실패 ${failed}개 · 기존 요청 완료 ${turns.length-targets.length}개 건너뜀`;
+                batchStatus.textContent = `브라우저 보관 ${completed-failed}개 · 실패 ${failed}개 · 기존 보관 ${turns.length-targets.length}개 건너뜀 · 창을 닫기 전에 MP3 ZIP 저장`;
             } finally { batchRunning = false; lockControls(); }
         });
 
