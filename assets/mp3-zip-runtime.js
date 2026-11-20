@@ -28,7 +28,8 @@ async function packageMp3Zip(imported=null){
   if(!inputs.length)throw new Error('변환할 음성이 없습니다. 먼저 음성을 생성하거나 현재 장 WAV를 선택하세요.');
   const library=await loadMp3Encoder();context=new (window.AudioContext||window.webkitAudioContext)({sampleRate:44100});const files=[],rows=[];
   const bitrate=Number(document.getElementById('mp3Bitrate').value)||128;
-  for(let n=0;n<inputs.length;n++){const input=inputs[n],turn=turns[input.index];zipProgress.textContent=`MP3 변환 ${n+1}/${inputs.length} · ${input.file.name}`;
+  const conversionStarted=performance.now();
+  for(let n=0;n<inputs.length;n++){const input=inputs[n],turn=turns[input.index];const elapsed=(performance.now()-conversionStarted)/1000;const eta=n?Math.max(0,(elapsed/n)*(inputs.length-n)):0;const fmt=s=>s<60?`${Math.ceil(s)}초`:`${Math.floor(s/60)}분 ${Math.ceil(s%60)}초`;zipProgress.textContent=`MP3 변환 ${n+1}/${inputs.length} · ${Math.round((n+1)/inputs.length*100)}% · 예상 남은 시간 ${fmt(eta)} · ${input.file.name}`;
    const encoder=new library.Mp3Encoder(1,44100,bitrate);
    const blob=await encodeMergedWavs([input.file],encoder,context,()=>{});if(!blob.size)throw new Error('빈 MP3: '+input.file.name);
    const name=input.file.name.replace(/\.wav$/i,'.mp3');files.push({name,blob});rows.push({order:input.index,filename:name,speaker:turn.speaker,voice:turn.voice,kind:turn.kind,text_sha256:await sha256(new TextEncoder().encode(turn.text)),text:turn.text,bitrate_kbps:bitrate,source:imported?'user_selected_wav_unverified_audio_content':'browser_generated_cache'});

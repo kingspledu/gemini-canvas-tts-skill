@@ -476,7 +476,7 @@ ${turn.text}`;
             batchRunning = true; lockControls();
             if (previewAudio) previewAudio.pause();
             progressBarContainer.classList.remove('hidden'); progressBar.style.width = '0%';
-            let completed = 0, failed = 0;
+            let completed = 0, failed = 0, startedAt = performance.now();
             try {
                 for (const index of targets) {
                     batchStatus.textContent = `재처리 대상 ${completed+1} / ${targets.length} · ${turns[index].filename} · ${turns[index].speaker}`;
@@ -486,6 +486,10 @@ ${turn.text}`;
                     else if (retrySelection) retrySelection.delete(index);
                     completed++;
                     progressBar.style.width = `${completed/targets.length*100}%`;
+                    const elapsed = (performance.now()-startedAt)/1000;
+                    const remaining = completed ? Math.max(0, (elapsed/completed)*(targets.length-completed)) : 0;
+                    const fmt = s => s < 60 ? `${Math.ceil(s)}초` : `${Math.floor(s/60)}분 ${Math.ceil(s%60)}초`;
+                    batchStatus.textContent = `생성 ${completed}/${targets.length} · ${Math.round(completed/targets.length*100)}% · 경과 ${fmt(elapsed)} · 예상 남은 시간 ${fmt(remaining)} · 실패 ${failed}개`;
                     await new Promise(resolve => setTimeout(resolve,800));
                 }
                 batchStatus.textContent = `브라우저 보관 ${completed-failed}개 · 실패 ${failed}개 · 기존 보관 ${turns.length-targets.length}개 건너뜀 · 창을 닫기 전에 MP3 ZIP 저장`;
