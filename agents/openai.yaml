@@ -1,0 +1,4 @@
+interface:
+  display_name: "Gemini Canvas 드라마 TTS"
+  short_description: "원문을 장별 낭독 HTML과 성우·연기·다운로드 색인으로 제작"
+  default_prompt: "$gemini-canvas-tts 스킬로 이 원문을 장별 드라마 TTS HTML로 만들어 줘."

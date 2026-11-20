@@ -1,0 +1,103 @@
+{
+  "schema_version": "canvas-tts-1",
+  "chapter": 1,
+  "title": "닫히지 않은 문",
+  "language": "ko-KR",
+  "revision": "V01",
+  "model": "gemini-2.5-flash-preview-tts",
+  "cast_revision": "V01",
+  "cast_sha256": "f103e1e2f76a649b126a4df47a370e191b3c386aab68a334400663c65b4b5821",
+  "voices": {
+    "나레이터": "Charon",
+    "미나": "Kore"
+  },
+  "scenes": [
+    {
+      "scene_id": "C01",
+      "title": "닫히지 않은 문",
+      "segments": [
+        {
+          "id": "C01_0000",
+          "speaker": "나레이터",
+          "kind": "narration",
+          "cast_id": "narrator",
+          "text": "미나는 젖은 우산을 접고 서점 문 앞에 섰다. 불은 켜져 있었지만 안에서는 아무 소리도 들리지 않았다.",
+          "scene_id": "door01",
+          "filename": "BOOKSHOP_C01_V01_0000_door01_NARRATOR.wav",
+          "voice": "Charon",
+          "model": "gemini-2.5-flash-preview-tts",
+          "cast_revision": "V01",
+          "cast_sha256": "f103e1e2f76a649b126a4df47a370e191b3c386aab68a334400663c65b4b5821",
+          "performance": {
+            "emotion": "평온한 도입에서 작은 의문으로",
+            "intensity": 0.42,
+            "pace": "medium",
+            "delivery": "natural voiced speech",
+            "pause_after_ms": 450,
+            "character_persona": "편안한 중저음. 상황을 또렷하게 잇고 인물 대사를 흉내 내지 않는다.",
+            "character_state": "same identity",
+            "acting_notes": "앞뒤 상황을 연결하고 본문 단어를 추가하거나 생략하지 않는다.",
+            "mic_direction": "또렷한 보통 발성. 잔향 없는 원음 생성.",
+            "nonverbal": "웃음·울음·기침·숨 고르기는 장면 근거가 있을 때만 짧게 연기한다. 지시문을 읽지 않는다.",
+            "cough_rule": "원문에 없는 기침·울음·비명·노래·음악을 임의로 넣지 않는다.",
+            "audio_effect": "dry"
+          }
+        },
+        {
+          "id": "C01_0001",
+          "speaker": "미나",
+          "kind": "dialogue",
+          "cast_id": "mina",
+          "text": "계세요? 아직 문 열었나요?",
+          "scene_id": "door01",
+          "filename": "BOOKSHOP_C01_V01_0001_door01_MINA.wav",
+          "voice": "Kore",
+          "model": "gemini-2.5-flash-preview-tts",
+          "cast_revision": "V01",
+          "cast_sha256": "f103e1e2f76a649b126a4df47a370e191b3c386aab68a334400663c65b4b5821",
+          "performance": {
+            "emotion": "상대가 있는지 조심스럽게 확인함",
+            "intensity": 0.55,
+            "pace": "medium",
+            "delivery": "natural voiced speech",
+            "pause_after_ms": 350,
+            "character_persona": "맑고 차분한 음색. 긴장하면 말의 시작만 조금 느려지고 말끝은 또렷하다.",
+            "character_state": "same identity",
+            "acting_notes": "열린 문 너머를 향해 부르되 소리를 지르지 않는다.",
+            "mic_direction": "또렷한 보통 발성. 잔향 없는 원음 생성.",
+            "nonverbal": "웃음·울음·기침·숨 고르기는 장면 근거가 있을 때만 짧게 연기한다. 지시문을 읽지 않는다.",
+            "cough_rule": "원문에 없는 기침·울음·비명·노래·음악을 임의로 넣지 않는다.",
+            "audio_effect": "dry"
+          }
+        },
+        {
+          "id": "C01_0002",
+          "speaker": "미나",
+          "kind": "monologue",
+          "cast_id": "mina",
+          "text": "그냥 돌아갈까. 그래도 오늘은 꼭 그 책을 찾고 싶어.",
+          "scene_id": "door01",
+          "filename": "BOOKSHOP_C01_V01_0002_door01_MINA.wav",
+          "voice": "Kore",
+          "model": "gemini-2.5-flash-preview-tts",
+          "cast_revision": "V01",
+          "cast_sha256": "f103e1e2f76a649b126a4df47a370e191b3c386aab68a334400663c65b4b5821",
+          "performance": {
+            "emotion": "망설임에서 작은 결심으로",
+            "intensity": 0.55,
+            "pace": "slightly slow",
+            "delivery": "natural voiced speech",
+            "pause_after_ms": 500,
+            "character_persona": "맑고 차분한 음색. 긴장하면 말의 시작만 조금 느려지고 말끝은 또렷하다.",
+            "character_state": "젖은 옷이 불편하지만 책을 찾고 싶은 마음이 더 큼",
+            "acting_notes": "앞뒤 상황을 연결하고 본문 단어를 추가하거나 생략하지 않는다.",
+            "mic_direction": "가까운 사람에게 나직하게 말하되 정상 발성을 유지한다. 속삭임·ASMR·과한 숨소리 금지. 잔향 없는 원음 생성.",
+            "nonverbal": "웃음·울음·기침·숨 고르기는 장면 근거가 있을 때만 짧게 연기한다. 지시문을 읽지 않는다.",
+            "cough_rule": "원문에 없는 기침·울음·비명·노래·음악을 임의로 넣지 않는다.",
+            "audio_effect": "echo-v4"
+          }
+        }
+      ]
+    }
+  ]
+}

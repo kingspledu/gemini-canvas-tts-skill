@@ -1,0 +1,55 @@
+{
+  "schema": "audio-index-1",
+  "prefix": "BOOKSHOP",
+  "revision": "V01",
+  "segments": [
+    {
+      "chapter": 1,
+      "order": 0,
+      "scene_id": "door01",
+      "segment_id": "C01_0000",
+      "speaker": "나레이터",
+      "kind": "narration",
+      "cast_id": "narrator",
+      "filename": "BOOKSHOP_C01_V01_0000_door01_NARRATOR.wav",
+      "voice": "Charon",
+      "model": "gemini-2.5-flash-preview-tts",
+      "cast_revision": "V01",
+      "text_sha256": "9eb8b15f888ef29bbdadfa4cc5d70dff6ed89b937afbae40b885e49d15b6b1b0",
+      "text": "미나는 젖은 우산을 접고 서점 문 앞에 섰다. 불은 켜져 있었지만 안에서는 아무 소리도 들리지 않았다."
+    },
+    {
+      "chapter": 1,
+      "order": 1,
+      "scene_id": "door01",
+      "segment_id": "C01_0001",
+      "speaker": "미나",
+      "kind": "dialogue",
+      "cast_id": "mina",
+      "filename": "BOOKSHOP_C01_V01_0001_door01_MINA.wav",
+      "voice": "Kore",
+      "model": "gemini-2.5-flash-preview-tts",
+      "cast_revision": "V01",
+      "text_sha256": "ab09002603b7d34c5f21f83ec7c6f5d167b1b92d6aafc1b4195096eff0dc46d1",
+      "text": "계세요? 아직 문 열었나요?"
+    },
+    {
+      "chapter": 1,
+      "order": 2,
+      "scene_id": "door01",
+      "segment_id": "C01_0002",
+      "speaker": "미나",
+      "kind": "monologue",
+      "cast_id": "mina",
+      "filename": "BOOKSHOP_C01_V01_0002_door01_MINA.wav",
+      "voice": "Kore",
+      "model": "gemini-2.5-flash-preview-tts",
+      "cast_revision": "V01",
+      "text_sha256": "b1e6f1cd27812bac304b8f3496df496e2c5406a67df536a9d7d3d45c288769d7",
+      "text": "그냥 돌아갈까. 그래도 오늘은 꼭 그 책을 찾고 싶어."
+    }
+  ],
+  "full_mp3": [
+    "BOOKSHOP_C01_V01_FULL.mp3"
+  ]
+}
