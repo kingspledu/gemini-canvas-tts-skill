@@ -1,6 +1,9 @@
 // No audio leaves this browser during conversion or ZIP packaging.
 const zipPanel=document.createElement('section');
 zipPanel.style.cssText='margin:16px;padding:16px;border:2px solid #2563eb;border-radius:12px;background:#eff6ff';
+const singleModeStyle=document.createElement('style');
+singleModeStyle.textContent='button:not(#generatePackMp3Zip), a, input, select, textarea, #controls, #resultsContainer > div:first-child { display:none !important; } #generatePackMp3Zip { display:inline-block !important; font-size:16px; font-weight:700; padding:12px 20px; border-radius:10px; background:#15803d; color:white; border:0; cursor:pointer; } #zipProgress { margin-top:12px; font-weight:600; }';
+document.head.appendChild(singleModeStyle);
 zipPanel.innerHTML='<h2>전체 생성 → MP3 ZIP</h2><p>한 번 누르면 미생성 구간을 순서대로 생성하고, 브라우저에 보관한 뒤 MP3 ZIP으로 저장합니다.</p><button id="generatePackMp3Zip" type="button">전체 생성 후 MP3 ZIP 다운로드</button> <button id="packMp3Zip" type="button">생성된 음성만 ZIP</button> <button id="importZipWavs" type="button">기존 WAV 선택 → MP3 ZIP</button><input id="zipWavInput" type="file" accept=".wav,audio/wav" multiple hidden><p id="zipProgress" role="status"></p><a id="zipDownload" hidden>ZIP 저장</a>';
 document.body.prepend(zipPanel);
 const zipButton=document.getElementById('packMp3Zip'),generateZipButton=document.getElementById('generatePackMp3Zip'),zipImport=document.getElementById('importZipWavs'),zipProgress=document.getElementById('zipProgress');
