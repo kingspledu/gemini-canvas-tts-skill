@@ -77,7 +77,10 @@ def generate(book, output):
     model = book.get('model', 'gemini-2.5-flash-preview-tts')
     template = (ROOT/'assets/canvas-template.html').read_text(encoding='utf-8')
     runtime = (ROOT/'assets/mp3-zip-runtime.js').read_text(encoding='utf-8')
-    template = template.replace('</script>', runtime + '\n</script>', 1)
+    close = template.rfind('</script>')
+    if close < 0:
+        raise ValueError('Canvas template has no script closing tag')
+    template = template[:close] + runtime + '\n' + template[close:]
     rows, used, chapters_seen = [], set(), set()
     output = Path(output); output.mkdir(parents=True, exist_ok=True)
     # A revision is a replacement release for this book prefix. Remove all
