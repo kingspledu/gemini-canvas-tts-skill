@@ -9,6 +9,8 @@ from build import generate, ROOT
 example=json.loads((ROOT/'assets/example-book.json').read_text(encoding='utf-8'))
 with tempfile.TemporaryDirectory() as temp:
     out=Path(temp)/'output'
+    out.mkdir()
+    (out/'SECOND_C01_V00_GEMINI_CANVAS_TTS.html').write_text('old', encoding='utf8')
     book=copy.deepcopy(example)
     book['title']='다른 작품 <테스트>'
     book['editorial_status']='reviewed'
@@ -17,6 +19,7 @@ with tempfile.TemporaryDirectory() as temp:
     book['chapters'].append(copy.deepcopy(book['chapters'][0]))
     book['chapters'][1]['number']=2
     index=generate(book,out)
+    assert not (out/'SECOND_C01_V00_GEMINI_CANVAS_TTS.html').exists()
     assert len(index['segments'])==6
     for chapter in book['chapters']:
         text=(out/f"SECOND_C{chapter['number']:02}_V01_SCRIPT.json").read_text(encoding='utf-8')

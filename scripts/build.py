@@ -80,6 +80,14 @@ def generate(book, output):
     template = template.replace('</script>', runtime + '\n</script>', 1)
     rows, used, chapters_seen = [], set(), set()
     output = Path(output); output.mkdir(parents=True, exist_ok=True)
+    # A revision is a replacement release for this book prefix. Remove all
+    # prior generated delivery artifacts before writing the new revision;
+    # editorial/source files use different names and are preserved.
+    old = re.compile(rf'^{re.escape(prefix)}_C\d{{2}}_V\d+_.+\.(?:html|json|wav|mp3)$', re.I)
+    old_index = re.compile(rf'^{re.escape(prefix)}_(?:AUDIO_INDEX|MP3_AUDIO_INDEX)_V\d+\.(?:json|csv)$', re.I)
+    for item in output.iterdir():
+        if item.is_file() and (old.fullmatch(item.name) or old_index.fullmatch(item.name)):
+            item.unlink()
     for chapter in book['chapters']:
         number = chapter['number']
         if not isinstance(number, int) or number < 1 or number in chapters_seen:
