@@ -5,6 +5,7 @@
   "language": "ko-KR",
   "revision": "V01",
   "model": "gemini-2.5-flash-preview-tts",
+  "execution_mode": "canvas-host",
   "cast_revision": "V01",
   "cast_sha256": "f103e1e2f76a649b126a4df47a370e191b3c386aab68a334400663c65b4b5821",
   "voices": {

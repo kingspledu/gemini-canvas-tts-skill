@@ -18,6 +18,8 @@ def token(value, label):
     return value
 
 def generate(book, output):
+    if book.get('execution_mode', 'canvas-host') != 'canvas-host':
+        raise ValueError('Only key-free Gemini Canvas host execution is supported')
     prefix = token(book['prefix'], 'prefix')
     revision = token(book.get('revision', 'V01'), 'revision')
     cast = book['cast']
@@ -78,6 +80,7 @@ def generate(book, output):
             raise ValueError('Each chapter needs at least one segment')
         episode = dict(schema_version='canvas-tts-1', chapter=number, title=chapter['title'],
                        language=book.get('language', 'ko-KR'), revision=revision, model=model,
+                       execution_mode='canvas-host',
                        cast_revision=revision, cast_sha256=cast_hash,
                        voices={p.get('name', c):p['voice'] for c,p in cast.items()},
                        scenes=[dict(scene_id=f'C{number:02}', title=chapter['title'], segments=units)])

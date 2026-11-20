@@ -26,6 +26,10 @@ with tempfile.TemporaryDirectory() as temp:
     try:generate(bad,Path(temp)/'bad')
     except KeyError:pass
     else:raise AssertionError('Missing cast silently accepted')
+    bad=copy.deepcopy(example);bad['execution_mode']='external-api'
+    try:generate(bad,Path(temp)/'external')
+    except ValueError:pass
+    else:raise AssertionError('Non-Canvas execution accepted')
     source=Path(temp)/'source.txt';raw='첫 문단.\n\n둘째 문단.\n줄바꿈.\n';source.write_text(raw,encoding='utf-8')
     subprocess.run(['python',str(ROOT/'scripts/build.py'),str(source),'--out',str(Path(temp)/'plain')],check=True)
     plain=json.loads((Path(temp)/'plain/BOOK_C01_V01_SCRIPT.json').read_text(encoding='utf-8'))
