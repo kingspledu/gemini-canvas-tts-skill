@@ -1,9 +1,9 @@
 // No audio leaves this browser during conversion or ZIP packaging.
 const zipPanel=document.createElement('section');
 zipPanel.style.cssText='margin:16px;padding:16px;border:2px solid #2563eb;border-radius:12px;background:#eff6ff';
-zipPanel.innerHTML='<h2>문장별 MP3 → ZIP 한 번 저장</h2><p>전체 생성은 브라우저 안에 보관합니다. 새로고침·창 닫기 전에 ZIP을 저장하세요. 이미 받은 WAV도 변환할 수 있습니다. 검토 미완료 대본 차단은 유지됩니다.</p><button id="packMp3Zip" type="button">생성된 음성을 MP3 ZIP으로 묶기</button> <button id="importZipWavs" type="button">기존 WAV 선택 → MP3 ZIP</button><input id="zipWavInput" type="file" accept=".wav,audio/wav" multiple hidden><p id="zipProgress" role="status"></p><a id="zipDownload" hidden>ZIP 저장</a>';
+zipPanel.innerHTML='<h2>전체 생성 → MP3 ZIP</h2><p>한 번 누르면 미생성 구간을 순서대로 생성하고, 브라우저에 보관한 뒤 MP3 ZIP으로 저장합니다.</p><button id="generatePackMp3Zip" type="button">전체 생성 후 MP3 ZIP 다운로드</button> <button id="packMp3Zip" type="button">생성된 음성만 ZIP</button> <button id="importZipWavs" type="button">기존 WAV 선택 → MP3 ZIP</button><input id="zipWavInput" type="file" accept=".wav,audio/wav" multiple hidden><p id="zipProgress" role="status"></p><a id="zipDownload" hidden>ZIP 저장</a>';
 document.body.prepend(zipPanel);
-const zipButton=document.getElementById('packMp3Zip'),zipImport=document.getElementById('importZipWavs'),zipProgress=document.getElementById('zipProgress');
+const zipButton=document.getElementById('packMp3Zip'),generateZipButton=document.getElementById('generatePackMp3Zip'),zipImport=document.getElementById('importZipWavs'),zipProgress=document.getElementById('zipProgress');
 let zipBusy=false,zipResultUrl=null;
 function zipCrc32(bytes){let crc=0xffffffff;for(const b of bytes){crc^=b;for(let k=0;k<8;k++)crc=(crc>>>1)^((crc&1)?0xedb88320:0)}return (crc^0xffffffff)>>>0}
 function zipRecord(size,values){const bytes=new Uint8Array(size),v=new DataView(bytes.buffer);for(const [offset,value,width] of values){if(width===2)v.setUint16(offset,value,true);else v.setUint32(offset,value,true)}return bytes}
@@ -44,4 +44,11 @@ async function packageMp3Zip(imported=null){
   zipProgress.textContent=`MP3 ${rows.length}개를 ZIP 하나로 묶었습니다. ${missing.length?'미생성 '+missing.length+'개: PARTIAL ZIP입니다.':'현재 장 전체 포함.'} 자동 저장이 안 되면 ZIP 링크를 직접 누르세요. 저장 완료 자체는 확인하지 못합니다.`;
  }catch(e){zipProgress.textContent='ZIP 실패: '+e.message;showMessage(e.message)}finally{if(context)await context.close().catch(()=>{});zipBusy=false;mergingAudio=false;lockControls();zipButton.disabled=zipImport.disabled=false}
 }
-zipButton.onclick=()=>packageMp3Zip();zipImport.onclick=()=>document.getElementById('zipWavInput').click();document.getElementById('zipWavInput').onchange=e=>{const files=Array.from(e.target.files);e.target.value='';if(files.length)packageMp3Zip(files)};
+async function generateThenPackage(){
+ if(zipBusy||batchRunning||activeRequests)return;
+ generateZipButton.disabled=true;zipProgress.textContent='전체 구간 순차 생성 중…';
+ batchProcessBtn.click();
+ while(batchRunning||activeRequests) await new Promise(r=>setTimeout(r,500));
+ await packageMp3Zip();
+}
+zipButton.onclick=()=>packageMp3Zip();generateZipButton.onclick=()=>generateThenPackage().catch(e=>{zipProgress.textContent='전체 생성 실패: '+e.message;showMessage(e.message)});zipImport.onclick=()=>document.getElementById('zipWavInput').click();document.getElementById('zipWavInput').onchange=e=>{const files=Array.from(e.target.files);e.target.value='';if(files.length)packageMp3Zip(files)};

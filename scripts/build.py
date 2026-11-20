@@ -76,7 +76,8 @@ def generate(book, output):
     cast_hash = digest(json.dumps(cast, ensure_ascii=False, sort_keys=True))
     model = book.get('model', 'gemini-2.5-flash-preview-tts')
     template = (ROOT/'assets/canvas-template.html').read_text(encoding='utf-8')
-    template = template.replace('__MP3_ZIP_RUNTIME__', (ROOT/'assets/mp3-zip-runtime.js').read_text(encoding='utf-8'))
+    runtime = (ROOT/'assets/mp3-zip-runtime.js').read_text(encoding='utf-8')
+    template = template.replace('</script>', runtime + '\n</script>', 1)
     rows, used, chapters_seen = [], set(), set()
     output = Path(output); output.mkdir(parents=True, exist_ok=True)
     for chapter in book['chapters']:
