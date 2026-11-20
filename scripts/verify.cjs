@@ -43,7 +43,7 @@ async function verify(dir){
   const start=js.indexOf("batchProcessBtn.addEventListener('click', async () => {");
   assert(start>=0);let body=js.slice(start,js.indexOf('function currentVoice',start));body=body.slice(0,body.lastIndexOf('});')+3);
   let handler,called=0;const status={textContent:'',classList:{remove(){},add(){}}};
-  const ctx={batchProcessBtn:{addEventListener:(n,f)=>handler=f},batchRunning:false,activeRequests:0,folderChecking:false,turns:[{filename:'TEST.wav',speaker:'Narrator',voice:'Charon'}],directoryHandle:null,retrySelection:null,downloadStates:[{requested:false,failed:false,voice:null}],fileEntries:[{getUrl:()=>null}],hostVoiceSelect:{value:'Charon'},batchStatus:status,lockControls(){},previewAudio:null,progressBarContainer:status,progressBar:{style:{}},document:{getElementById:()=>({scrollIntoView(){}})},sentenceHandlers:[async()=>{called++;return 'blob:test'}],setTimeout:f=>f(),showMessage:m=>{throw Error(m)}};
+  const ctx={batchProcessBtn:{addEventListener:(n,f)=>handler=f},batchRunning:false,activeRequests:0,folderChecking:false,turns:[{filename:'TEST.wav',speaker:'Narrator',voice:'Charon'}],directoryHandle:null,retrySelection:null,downloadStates:[{requested:false,failed:false,voice:null}],fileEntries:[{getUrl:()=>null}],hostVoiceSelect:{value:'Charon'},batchStatus:status,lockControls(){},previewAudio:null,progressBarContainer:status,progressBar:{style:{}},performance:{now:()=>0},document:{getElementById:()=>({scrollIntoView(){}})},sentenceHandlers:[async()=>{called++;return 'blob:test'}],setTimeout:f=>f(),showMessage:m=>{throw Error(m)}};
   vm.createContext(ctx);vm.runInContext(body,ctx);await handler();assert.equal(called,1);
   console.log('PASS',file,turns.length,'segments; syntax, index, DSP, mocked batch');
  }
